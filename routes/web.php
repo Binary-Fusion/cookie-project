@@ -26,6 +26,10 @@ Route::group(['middleware' => 'auth'], function () {
             return redirect()->back()->with('error', 'Sorry! cookies amount must be a number.');
         }
 
+        if ($cookies <= 0) {
+            return redirect()->back()->with('error', 'Sorry! cookies amount must be grater than 0.');
+        }
+
         $user   = Auth::user();
         $wallet = $user->wallet;
 
