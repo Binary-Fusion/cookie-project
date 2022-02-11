@@ -437,7 +437,12 @@
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="">
                 <div>
-                    <h1>Buy Some Cookies</h1><br>
+                    <h1>Buy Some Cookies</h1>
+                    <span>Each cookie is $1</span>
+                    @auth
+                        <span>(You have ${{ auth()->user()->wallet }} in your wallet)</span>
+                    @endauth<br><br>
+                    
                 </div>
 
                 <form method="get" id="form">
