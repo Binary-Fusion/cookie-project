@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -24,24 +23,22 @@ Route::get('/', function () {
 Route::group(['middleware' => 'auth'], function () {
     Route::get('buy/{cookies}', function ($cookies) {
         if (! is_numeric($cookies)) {
-            return Blade::render('Cookies amount must be a number.');
+            return redirect()->back()->with('error', 'Sorry! cookies amount must be a number.');
         }
 
         $user   = Auth::user();
         $wallet = $user->wallet;
 
         if ($cookies > $wallet) {
-            return Blade::render('You have not enough money in your wallet to buy this cookies.');
+            return redirect()->back()->with('error', 'Sorry! you have not enough money in your wallet to buy this amount of cookies.');
         }
 
         $user->update(['wallet' => $wallet - $cookies]);
     
         Log::info('User ' . $user->email . ' have bought ' . $cookies . ' cookies');
 
-        return Blade::render('Success, you have bought, {{ $cookies }} cookies!', ['cookies' => $cookies]);
+        return redirect()->back()->with('success', 'Success, you have bought ' . $cookies . ' cookies!');
     });
 });
 
 Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

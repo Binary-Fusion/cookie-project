@@ -9,6 +9,7 @@
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- Styles -->
     <style>
@@ -427,13 +428,21 @@
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="">
                 <div>
-                    <h1>Buy Some Cookies</h1>
+                    <h1>Buy Some Cookies</h1><br>
                 </div>
 
                 <form method="get">
+                    @if (Session::has('success'))
+                        <p class="alert alert-success">{{ Session::get('success') }}</p>
+                    @endif
+
+                    @if (Session::has('error'))
+                        <p class="alert alert-danger">{{ Session::get('error') }}</p>
+                    @endif
+
                     <input autofocus type="number" name="cookies" placeholder="Amount"
                         class="@error('name') is-invalid @enderror border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg">
-                    <input type="submit" value="Buy Now">
+                    <input class="btn btn-info" type="submit" value="Buy Now">
                 </form>
             </div>
         </div>
