@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -48,23 +50,41 @@ Route::group(['middleware' => 'auth'], function () {
             return redirect()->back()->with('error', 'Sorry! cookies amount must be grater than 0.');
         }
 
-        $user   = Auth::user();
+        //$user   = Auth::user();
+        $user = User::lockForUpdate()->find(Auth::user()->id);
         $wallet = $user->wallet;
 
         if ($cookies > $wallet) {
             return redirect()->back()->with('error', 'Sorry! you have not enough money in your wallet to buy this amount of cookies.');
         }
 
-        $cachedUser = Cache::get('cachedUser');
+        //$cachedUser = Cache::get('cachedUser');
 
-        if ($cachedUser && ($cachedUser['cookies'] == $cookies && $cachedUser['user_id'] == $user->id)) {
-            return redirect()->back()->with('error', 'Sorry! You are not allowed to buy your cookies this time. Try after ' . config('cache.cache_time')/60 . ' minute');
-        }
+        // if ($cachedUser && ($cachedUser['cookies'] == $cookies && $cachedUser['user_id'] == $user->id)) {
+        //     return redirect()->back()->with('error', 'Sorry! You are not allowed to buy your cookies this time. Try after ' . config('cache.cache_time')/60 . ' minute');
+        // }
 
-        $user->update(['wallet' => $wallet - $cookies]);
+        // $user->update(['wallet' => $wallet - $cookies]);
+
+        // DB::transaction(function () use ($user, $wallet, $cookies) {
+        //     $user->update(['wallet' => $wallet - $cookies]);
+        // }, 1);
+
+        DB::transaction(function() use ($user, $wallet, $cookies) {
+            $user = User::lockForUpdate()->find($user->id);
+            $user->update(['wallet' => $wallet - $cookies]);
+        });
+
+        // User::lockForUpdate()->find(1);
+
+        // $user = User::lockForUpdate()->find($user->id);
+        // $user->wallet = $user->wallet - $cookies;
+        // $user->save();
+
+       // $user->update(['wallet' => $wallet - $cookies]);
 
         // Cache the user buying cookies info for 1 minutes
-        Cache::put('cachedUser', ['user_id' => $user->id, 'cookies' => $cookies], config('cache.cache_time'));
+        // Cache::put('cachedUser', ['user_id' => $user->id, 'cookies' => $cookies], config('cache.cache_time'));
         //Note: we can use db transection here to make sure that the user buying cookies is the same user who is buying cookies but it will not useful at this time. because we updating just one query.
     
         Log::info('User ' . $user->email . ' have bought ' . $cookies . ' cookies');
