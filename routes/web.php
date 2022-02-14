@@ -29,9 +29,16 @@ Route::group(['middleware' => 'auth'], function () {
         //     'cookies' => $cookies
         // ]);
 
-        // $request->validate([
-        //     'cookies' => 'required|min:1|numeric'
-        // ]);
+        // $request->validate(
+        //     [
+        //         'cookies' => 'required|min:1|numeric'
+        //     ],
+        //     [
+        //         'cookies.required' => 'Please enter cookie amount.',
+        //         'cookies.min'      => 'You must buy at least 1 cookie.',
+        //         'cookies.numeric'  => 'cookies amount must be a number.'
+        //     ]
+        // );
         
         if (! is_numeric($cookies)) {
             return redirect()->back()->with('error', 'Sorry! cookies amount must be a number.');

@@ -413,9 +413,10 @@
         @if (Route::has('login'))
             <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
                 @auth
-                    <a class="text-sm text-gray-700 dark:text-gray-500 underline">{{ auth()->user()->name }}</a>&nbsp;&nbsp;
+                    <a
+                        class="text-sm text-gray-700 dark:text-gray-500 underline">{{ auth()->user()->name }}</a>&nbsp;&nbsp;
                     <a class="text-sm text-gray-700 dark:text-gray-500 underline" href="{{ route('logout') }}" onclick="event.preventDefault();
-                                         document.getElementById('logout-form').submit();">
+                                                         document.getElementById('logout-form').submit();">
                         {{ __('Logout') }}
                     </a>
 
@@ -442,10 +443,14 @@
                     @auth
                         <span>(You have ${{ auth()->user()->wallet }} in your wallet)</span>
                     @endauth<br><br>
-                    
+
                 </div>
 
                 <form method="get" id="form">
+                    @foreach ($errors->all() as $error)
+                        <li style="list-style: none"><p class="alert alert-danger">{{ $error }}</p></li>
+                    @endforeach
+
                     @if (Session::has('success'))
                         <p class="alert alert-success">{{ Session::get('success') }}</p>
                     @endif
@@ -455,7 +460,12 @@
                     @endif
 
                     <input autofocus type="number" name="cookies" placeholder="Amount"
-                        class="@error('name') is-invalid @enderror border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg">
+                        class="@error('cookies') is-invalid @enderror border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg">
+                    @error('cookies')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
                     <input class="btn btn-info" type="submit" value="Buy Now">
                 </form>
             </div>
