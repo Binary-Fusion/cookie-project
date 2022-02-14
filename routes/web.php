@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +24,15 @@ Route::get('/', function () {
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('buy/{cookies}', function ($cookies) {
+        // We can use this too
+        // $request = new Request([
+        //     'cookies' => $cookies
+        // ]);
+
+        // $request->validate([
+        //     'cookies' => 'required|min:1|numeric'
+        // ]);
+        
         if (! is_numeric($cookies)) {
             return redirect()->back()->with('error', 'Sorry! cookies amount must be a number.');
         }
@@ -37,7 +48,17 @@ Route::group(['middleware' => 'auth'], function () {
             return redirect()->back()->with('error', 'Sorry! you have not enough money in your wallet to buy this amount of cookies.');
         }
 
+        $cachedUser = Cache::get('cachedUser');
+
+        if ($cachedUser && ($cachedUser['cookies'] == $cookies && $cachedUser['user_id'] == $user->id)) {
+            return redirect()->back()->with('error', 'Sorry! You are not allowed to buy your cookies this time. Try after ' . config('cache.cache_time')/60 . ' minute');
+        }
+
         $user->update(['wallet' => $wallet - $cookies]);
+
+        // Cache the user buying cookies info for 1 minutes
+        Cache::put('cachedUser', ['user_id' => $user->id, 'cookies' => $cookies], config('cache.cache_time'));
+        //Note: we can use db transection here to make sure that the user buying cookies is the same user who is buying cookies but it will not useful at this time. because we updating just one query.
     
         Log::info('User ' . $user->email . ' have bought ' . $cookies . ' cookies');
 
